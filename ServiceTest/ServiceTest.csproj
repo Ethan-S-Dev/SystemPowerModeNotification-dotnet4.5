@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{3A8E22DC-464D-4171-BDC3-FE5E3BBA7DE2}</ProjectGuid>
+    <ProjectGuid>{72B0906A-5E84-4B66-ABC3-BEB50017509F}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>SystemPowerNotificationsTest</RootNamespace>
-    <AssemblyName>SystemPowerNotificationsTest</AssemblyName>
+    <RootNamespace>ServiceTest</RootNamespace>
+    <AssemblyName>ServiceTest</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -53,7 +53,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Configuration.Install" />
     <Reference Include="System.Core" />
+    <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />

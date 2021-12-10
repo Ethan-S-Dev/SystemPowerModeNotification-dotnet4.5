@@ -32,6 +32,26 @@
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
@@ -57,6 +77,9 @@
     <Reference Include="Vanara.Core, Version=3.3.14.0, Culture=neutral, PublicKeyToken=c37e4080322237fa, processorArchitecture=MSIL">
       <HintPath>..\packages\Vanara.Core.3.3.14\lib\net45\Vanara.Core.dll</HintPath>
     </Reference>
+    <Reference Include="Vanara.PInvoke.Cryptography, Version=3.3.14.0, Culture=neutral, PublicKeyToken=c37e4080322237fa, processorArchitecture=MSIL">
+      <HintPath>..\packages\Vanara.PInvoke.Cryptography.3.3.14\lib\net45\Vanara.PInvoke.Cryptography.dll</HintPath>
+    </Reference>
     <Reference Include="Vanara.PInvoke.Gdi32, Version=3.3.14.0, Culture=neutral, PublicKeyToken=c37e4080322237fa, processorArchitecture=MSIL">
       <HintPath>..\packages\Vanara.PInvoke.Gdi32.3.3.14\lib\net45\Vanara.PInvoke.Gdi32.dll</HintPath>
     </Reference>
@@ -65,6 +88,9 @@
     </Reference>
     <Reference Include="Vanara.PInvoke.PowrProf, Version=3.3.14.0, Culture=neutral, PublicKeyToken=c37e4080322237fa, processorArchitecture=MSIL">
       <HintPath>..\packages\Vanara.PInvoke.PowrProf.3.3.14\lib\net45\Vanara.PInvoke.PowrProf.dll</HintPath>
+    </Reference>
+    <Reference Include="Vanara.PInvoke.Security, Version=3.3.14.0, Culture=neutral, PublicKeyToken=c37e4080322237fa, processorArchitecture=MSIL">
+      <HintPath>..\packages\Vanara.PInvoke.Security.3.3.14\lib\net45\Vanara.PInvoke.Security.dll</HintPath>
     </Reference>
     <Reference Include="Vanara.PInvoke.Shared, Version=3.3.14.0, Culture=neutral, PublicKeyToken=c37e4080322237fa, processorArchitecture=MSIL">
       <HintPath>..\packages\Vanara.PInvoke.Shared.3.3.14\lib\net45\Vanara.PInvoke.Shared.dll</HintPath>

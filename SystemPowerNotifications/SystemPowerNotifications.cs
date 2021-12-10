@@ -1,57 +1,100 @@
-﻿using Vanara.PInvoke;
+﻿using System.Runtime.InteropServices;
+using Vanara.PInvoke;
 
 namespace System.PowerNotifications
 {
     public static class SystemPowerNotifications
     {
-        public static event SystemPowerNotificationEventHandler PowerModeChanged 
-        { 
+        public static string ServiceName { get; set; }
+        public static event SystemPowerNotificationEventHandler PowerModeChanged
+        {
             add
-            {                           
+            {
                 _powerModeChanged += value;
-                if (_eventHandler == null)
+                if (_powerEventHandler == null)
                 {
+                    if (!string.IsNullOrEmpty(ServiceName))
+                    {
+                        if (_ssh.IsNull)
+                            _ssh = AdvApi32.RegisterServiceCtrlHandlerEx(ServiceName, OnDisplayNotify);
+                        if (_ssh.IsNull)
+                            throw new Exception("Failed To Register ServiceCtrlHandlerEx");
+                        _displayEventHandler = User32.RegisterPowerSettingNotification(((IntPtr)_ssh), PowrProf.GUID_MONITOR_POWER_ON, User32.DEVICE_NOTIFY.DEVICE_NOTIFY_SERVICE_HANDLE);
+                        if (_displayEventHandler.IsNull)
+                            throw new Exception("Failed To Register PowerSettingNotification");
+                    }
+
                     var result = PowrProf.PowerRegisterSuspendResumeNotification(PowrProf.RegisterSuspendResumeNotificationFlags.DEVICE_NOTIFY_CALLBACK,
-                    _dnsp, out _eventHandler);
+                    _dnsp, out _powerEventHandler);
                     if (result != Win32Error.ERROR_SUCCESS)
-                        throw new Exception();
+                        throw new Exception("Failed To Register PowerSuspendResumeNotification");
                 }
-            } 
-            remove 
+
+            }
+            remove
             {
                 _powerModeChanged -= value;
-                if(_powerModeChanged.GetInvocationList().Length == 0)
+                if (_powerModeChanged == null)
                 {
-                    if (PowrProf.PowerUnregisterSuspendResumeNotification(_eventHandler) != Win32Error.NO_ERROR)
-                        throw new Exception();
-                    _eventHandler.Dispose();
-                    _eventHandler = null;
-                }       
+                    if (!string.IsNullOrEmpty(ServiceName))
+                    {
+                        if (!User32.UnregisterPowerSettingNotification(_displayEventHandler))
+                            throw new Exception("Failed To Unregister PowerSettingNotification");
+                        _displayEventHandler.Dispose();
+                        _displayEventHandler = null;
+                    }
+
+                    if (PowrProf.PowerUnregisterSuspendResumeNotification(_powerEventHandler) != Win32Error.NO_ERROR)
+                        throw new Exception("Failed To Unregister PowerSuspendResumeNotification");
+                    _powerEventHandler.Dispose();
+                    _powerEventHandler = null;
+                }
             }
         }
 
-        private static PowrProf.SafeHPOWERNOTIFY _eventHandler;
+
+
+        private static PowrProf.SafeHPOWERNOTIFY _powerEventHandler;
+        private static User32.SafeHPOWERSETTINGNOTIFY _displayEventHandler;
+        private static AdvApi32.SERVICE_STATUS_HANDLE _ssh;
         private static PowrProf.DEVICE_NOTIFY_SUBSCRIBE_PARAMETERS _dnsp = new PowrProf.DEVICE_NOTIFY_SUBSCRIBE_PARAMETERS
         {
             Callback = OnDeviceNotify,
             Context = IntPtr.Zero
         };
+
         private static Win32Error OnDeviceNotify(IntPtr context, uint type, IntPtr setting)
         {
-            _powerModeChanged?.Invoke(null,new PowerNotificationArgs((PowerBroadcastType)type));
+            _powerModeChanged?.Invoke(null, new PowerNotificationArgs((PowerBroadcastType)type));
+            return 0;
+        }
+        private static Win32Error OnDisplayNotify(AdvApi32.ServiceControl control,uint eventType,IntPtr eventData,IntPtr context)
+        {
+            var dataHandle = new HANDLE(eventData);
+            var contextHandle = new HANDLE(context);
+            if(control == AdvApi32.ServiceControl.SERVICE_CONTROL_POWEREVENT)
+            {
+                POWERBRODCAST_SETTING settings = (POWERBRODCAST_SETTING)Marshal.PtrToStructure(eventData, typeof(POWERBRODCAST_SETTING));
+                _powerModeChanged?.Invoke(null, new PowerNotificationArgs((PowerBroadcastType)eventType,settings.Data));
+            }
+            
             return 0;
         }
         private static SystemPowerNotificationEventHandler _powerModeChanged;
     }
 
+    public delegate uint PowerSettingNotificationEventHandler(uint dwControl, uint dwEventType, IntPtr lpEventData, IntPtr lpContext);
     public delegate void SystemPowerNotificationEventHandler(object sender, PowerNotificationArgs args);
+
     public class PowerNotificationArgs : EventArgs
     {
-        public PowerNotificationArgs(PowerBroadcastType mode)
+        public PowerNotificationArgs(PowerBroadcastType mode,bool isMonitorOn = false)
         {
             Mode = mode;
+            IsMonitorOn = isMonitorOn;
         }
-        public PowerBroadcastType Mode { get;}
+        public PowerBroadcastType Mode { get; }
+        public bool IsMonitorOn { get; }
     }
     public enum PowerBroadcastType
     {
@@ -229,7 +272,19 @@ namespace System.PowerNotifications
         // Remarks:
         //     lParam: Pointer to a POWERBROADCAST_SETTING structure.
         //     No return value.
-        PBT_POWERSETTINGCHANGE = 32787
+        PBT_POWERSETTINGCHANGE = 32787,
+        ERROR_ERROR = 10101
     }
-
+    [StructLayout(LayoutKind.Sequential)]
+    public struct POWERBRODCAST_SETTING
+    {
+        public Guid PowerSetting;
+        public uint DataLength;
+        public bool Data;
+    }
+    public enum MonitorState
+    {
+        Off,
+        On
+    }
 }

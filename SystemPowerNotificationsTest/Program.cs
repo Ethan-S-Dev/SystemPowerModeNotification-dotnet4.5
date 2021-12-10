@@ -7,6 +7,7 @@ namespace SystemPowerNotificationsTest
     {
         static void Main(string[] args)
         {
+            SystemPowerNotifications.ServiceName = "SimpleTestService";
             SystemPowerNotifications.PowerModeChanged += SystemPowerNotifications_PowerModeChanged;
             Console.ReadLine();
             SystemPowerNotifications.PowerModeChanged -= SystemPowerNotifications_PowerModeChanged;
